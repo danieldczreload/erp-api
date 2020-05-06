@@ -1,0 +1,37 @@
+version: "3.7"
+services:
+  phpserver:
+    build:
+      ./apache-php
+    ports:
+      - "80:80"
+    networks:
+      - backend
+    volumes:
+    - ../:/var/www/html
+  mysql:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+      MYSQL_USER: "${MYSQL_USER}"
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+    ports:
+      - '3306:3306'
+    networks:
+      - backend
+    expose:
+      - '3306'
+    volumes:
+      - ../data/my-db:/var/lib/mysql
+
+  composer:
+    image: composer
+    command: install
+    volumes:
+      - ../:/app
+    networks:
+      - backend
+networks:
+  backend:
