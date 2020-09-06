@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('orders', 'WorkOrderController@index')->middleware(['return.json','auth:api']);
 Route::post('orders/store', 'WorkOrderController@store')->middleware(['return.json','auth:api']);
+Route::post('orders/sendEmail/{id}', 'WorkOrderController@sendEmail');
 
 /*Route::middleware(['return.json','auth:api']) // Use our JSON Middleware
     ->group(function () {

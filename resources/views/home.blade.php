@@ -67,12 +67,12 @@
                                 <th>Ship Date</th>
                                 <th>Style</th>
                                 <th>Color</th>
-                                <th>Ship to</th>
+                                <th style="width: 15%">Ship to</th>
                                 <th>FOB Price </th>
                                 @foreach($order->order_items->first()->order_item_sizes as $size)
                                     <th>{{$size->size_name}}</th>
                                 @endforeach
-                                <th>Actions</th>
+                                <th style="width: 15%">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -87,7 +87,10 @@
                             @foreach($order->order_items->first()->order_item_sizes as $size)
                                 <th>{{$size->qty}}</th>
                             @endforeach
-                            <td></td>
+                            <td>
+                                <button type="button" class="btn btn-primary" style="font-size: 0.8rem">Accept</button>
+                                <button type="button" class="btn btn-secondary" style="font-size: 0.8rem">Cancel</button>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
@@ -146,20 +149,15 @@
                             const value = f.value; //valor a buscar
                             const key = f.id;
                             if(value!==""){
-                                console.log(order.dataset[f.id].toUpperCase());
-                                console.log(value.toUpperCase());
-                                ban = ban && order.dataset[f.id].toUpperCase().startsWith(value.toUpperCase());
+                                ban = ban && order.dataset[key].toUpperCase().startsWith(value.toUpperCase());
                             }else{
                                 ban = ban && true;
                             }
                         }
-                        //console.log(ban);
                         order.style.display = ban?"":"none";
                     }
                 };
             }
-
-
         })
     </script>
 @endsection

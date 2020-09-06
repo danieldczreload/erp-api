@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\order_item;
 use App\work_order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class WorkOrderController extends Controller
 {
@@ -106,5 +107,20 @@ class WorkOrderController extends Controller
     public function destroy(work_order $work_order)
     {
         //
+    }
+
+    public function sendEmail(int $id){
+        $order = work_order::with('order_items.order_item_sizes')
+                ->where('id',$id)
+                ->get()
+                ->sortBy('order_items.order_item_sizes.order_by');
+        $order = $order->first();
+        $html = view('order', ["order"=>$order])->render();
+        if(!empty($order)){
+            $response = Http::post('https://prod-117.westus.logic.azure.com:443/workflows/fadb50194ffa4811b7c38b1c9a4e860c/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=5P9ZHlFkVkK7na2QHo_IspmzQEFYGr9gfOSXb0uab70',
+                [
+                'html' => $html,
+            ]);
+        }
     }
 }
