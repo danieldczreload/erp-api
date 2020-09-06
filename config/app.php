@@ -228,5 +228,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
 
     ],
+    'email_admin' => env('EMAIL_ADMIN_SEEDER'),
+    'pass_admin' => env('PASS_ADMIN_SEEDER')
 
 ];

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\work_order;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -13,7 +14,7 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth:web');
     }
 
     /**
@@ -23,6 +24,10 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        $orders = work_order::with('order_items.order_item_sizes')
+                    ->where('status',1)
+                    ->get()
+                    ->sortBy('order_items.order_item_sizes.order_by');
+        return view('home',["orders"=>$orders]);
     }
 }

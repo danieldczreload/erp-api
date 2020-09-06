@@ -14,6 +14,14 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
+/*Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
-});
+});*/
+
+Route::get('orders', 'WorkOrderController@index')->middleware(['return.json','auth:api']);
+Route::post('orders/store', 'WorkOrderController@store')->middleware(['return.json','auth:api']);
+
+/*Route::middleware(['return.json','auth:api']) // Use our JSON Middleware
+    ->group(function () {
+        Route::get('orders', 'WorkOrderController@index');
+    });*/
