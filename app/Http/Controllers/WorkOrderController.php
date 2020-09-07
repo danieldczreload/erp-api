@@ -6,6 +6,8 @@ use App\order_item;
 use App\work_order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 
 class WorkOrderController extends Controller
 {
@@ -40,6 +42,35 @@ class WorkOrderController extends Controller
     {
         //$order = work_order::create($request->all());
         if($request->isJson()){
+            $messages = [
+                'order_number' => 'The Order Number is not valid',
+                'client' => 'The Client is required',
+                'ship_date' => 'The Ship date is not valid',
+                'item.style' => 'Style is required',
+                'item.color' => 'Color is required',
+                'item.ship_info' => 'Ship info is required',
+                'item.fob_price' => 'FOB Price is not valid',
+                'item.fob_price.numeric' => 'FOB Price is not valid',
+                'item.sizes.*.size_name' => 'Size is required',
+                'item.sizes.*.qty' => 'Size qty is not valid',
+                'item.sizes.*.qty.numeric' => 'Size qty is not valid',
+                'item.sizes.*.order_by' => 'Order by is required',
+                'item.sizes.*.order_by.numeric' => 'Order by is required',
+            ];
+
+           Validator::make($request->all(), [
+                'order_number' => 'required',
+                'client' => 'required',
+                'ship_date' => 'required|date',
+                'item.style' => 'required',
+                'item.color' => 'required',
+                'item.ship_info' => 'required',
+                'item.fob_price' => 'required|numeric',
+                'item.sizes.*.size_name' => 'required',
+                'item.sizes.*.qty' => 'required|numeric',
+                'item.sizes.*.order_by' => 'required|numeric',
+            ], $messages)->validate();
+
             $order= work_order::create($request->all());
             $item =$request->get("item");
             /**
@@ -115,12 +146,47 @@ class WorkOrderController extends Controller
                 ->get()
                 ->sortBy('order_items.order_item_sizes.order_by');
         $order = $order->first();
-        $html = view('order', ["order"=>$order])->render();
+        try {
+            $html = view('order', ["order" => $order])->render();
+        } catch (\Throwable $e) {
+            $html = "";
+        }
         if(!empty($order)){
-            $response = Http::post('https://prod-117.westus.logic.azure.com:443/workflows/fadb50194ffa4811b7c38b1c9a4e860c/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=5P9ZHlFkVkK7na2QHo_IspmzQEFYGr9gfOSXb0uab70',
+            Http::post('https://prod-117.westus.logic.azure.com:443/workflows/fadb50194ffa4811b7c38b1c9a4e860c/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=5P9ZHlFkVkK7na2QHo_IspmzQEFYGr9gfOSXb0uab70',
                 [
                 'html' => $html,
             ]);
         }
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function acceptOrder(Request $request){
+        $work_order = work_order::where('id', $request->get("order_id_accept"))
+                                        ->update(array('erp' => $request->get("erp"),"status"=>2));
+        if($work_order){
+            Session::flash('message', 'Order was accepted!');
+            Session::flash('alert-class', 'alert-success');
+        }else{
+            Session::flash('message', 'Order has errors!');
+            Session::flash('alert-class', 'alert-danger');
+        }
+        $this->sendEmail($request->get("order_id_accept"));
+        return redirect()->action('HomeController@index');
+    }
+
+    public function cancelOrder(int $id){
+        $work_order = work_order::where('id', $id)
+            ->update(array("status"=>0));
+        if($work_order){
+            Session::flash('message', 'Order was cancelled!');
+            Session::flash('alert-class', 'alert-success');
+        }else{
+            Session::flash('message', 'Error!');
+            Session::flash('alert-class', 'alert-danger');
+        }
+        return redirect()->action('HomeController@index');
     }
 }

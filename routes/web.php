@@ -19,3 +19,11 @@ Route::get('/', 'HomeController@index')->name('home');
 Auth::routes();
 
 Route::get('/logout', '\App\Http\Controllers\Auth\LoginController@logout');
+
+Route::post('/accept','WorkOrderController@acceptOrder')->name('accept.order');
+Route::get('/cancel/{id}','WorkOrderController@cancelOrder')->name('cancel.order');
+
+/*upload file screen*/
+Route::get('/uploadFile', 'ProcessFileController@index')->name('upload');
+/*prcoess the file*/
+Route::post('/processFile', 'ProcessFileController@process');

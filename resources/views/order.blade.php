@@ -1,6 +1,6 @@
 <br />
 
-<label for=""><b>Order accepted at: </b> Artfx</label>
+<label for=""><b>Order accepted at: </b> {{$order->erp}}</label>
 <br /><br />
 <table style="border: 1px solid #dee2e6;
             width: 100%;

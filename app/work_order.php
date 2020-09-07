@@ -22,6 +22,7 @@ class work_order extends Model
      */
     protected $attributes = [
         'status' => 1,
+        'erp' => ''
     ];
 
     public function order_items(){
